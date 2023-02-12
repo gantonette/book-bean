@@ -2,8 +2,10 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
-import { getStorage } from "firebase/storage";
+import { getStorage, ref, uploadString, uploadBytes } from "firebase/storage";
 import { getAuth } from "firebase/auth";
+import 'firebase/storage';
+
 
 
 // Your web app's Firebase configuration
@@ -21,10 +23,23 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-// Initialize Cloud Storage and get a reference to the service
-const storage = getStorage(app);
 
-// Create a storage reference from our storage service
+
+const storage = getStorage();
+// const storageRef = ref(storage, 'some-child-file');
+
+// const file = new File(['hello'], 'hello.txt')
+
+// // 'file' comes from the Blob or File API
+// uploadBytes(storageRef, file).then((snapshot) => {
+//   console.log('Uploaded a blob or file!');
+// });
+
+// Raw string is the default if no format is provided
+// const message = 'This is my message.';
+// uploadString(storageRef, message).then((snapshot) => {
+//   console.log('Uploaded a raw string!');
+// });
 
 const auth = getAuth(app);
 

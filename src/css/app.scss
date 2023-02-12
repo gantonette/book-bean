@@ -10,8 +10,7 @@
   transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
   &:hover {
     box-shadow: 0 14px 28px rgba(86, 208, 49, 0.25), 0 10px 10px rgba(93, 209, 151, 0.98);
-
-}
+  }
 }
 
 // Register and Sign in CSS
@@ -72,7 +71,7 @@
 }
 
 
-
+// @@@@@@@@@@@@@@@@@@timeline css
 
   .timeline-img {
   border-radius: 70%;
@@ -83,4 +82,24 @@
   }
 
 
+  .q-timeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+  }
+
+  .timeline-entry {
+    padding: 80px;
+    margin-top: 100px;
+    display: flex;
+    margin-bottom: 1rem;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+    &:hover {
+      box-shadow: 0 14px 28px rgba(86, 208, 49, 0.25), 0 10px 10px rgba(93, 209, 151, 0.98);
+    }
+  }
 
