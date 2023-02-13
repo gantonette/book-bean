@@ -13,8 +13,9 @@
         size="large"
       >
         <div class="q-pt-lg timeline-entry-content">
-          <q-img class="timeline-img" src='../assets/images/bookcover.png' />
+          <q-img class="timeline-img" src="../assets/images/bookcover.png" />
           {{book.description}}
+          <img class="timeline-img" id="myimg" />
         </div>
       </q-timeline-entry>
     </template>
@@ -27,9 +28,8 @@
         <q-input color="green-8" v-model="author" label="author"/>
         <q-input color="green-8" v-model="description" label="description">
           <input type="file" ref="fileInput"/>
-          <button @click="uploadFile">Upload File</button>
           <template v-slot:append>
-            <q-btn round color="green-3" icon="local_florist" :ripple="{ center: true }" @click="addItem"/>
+            <q-btn round color="green-3" icon="local_florist" :ripple="{ center: true }" @click="addItem() + uploadFile()"/>
           </template>
         </q-input>
       </div>
@@ -44,17 +44,23 @@ import { db } from './firebase';
 import { getFirestore, collection, onSnapshot, doc, deleteDoc, addDoc} from "firebase/firestore";
 import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import 'firebase/storage';
-import { getStorage, uploadBytes, ref as firebaseRef} from "firebase/storage";
+import { getStorage, uploadBytes, ref as firebaseRef, getDownloadURL} from "firebase/storage";
 
-// Storage
 const storage = getStorage();
-const storageRef = firebaseRef(storage, 'some-child-file');
 
-const file = new File(['hello'], 'hello.txt')
+let bookID;
 
-uploadBytes(storageRef, file).then((snapshot) => {
-  console.log('Uploaded a blob or file!');
-});
+
+getDownloadURL(firebaseRef(storage, '/1907868.jpg'))
+  .then((url) => {
+    // Or inserted into an <img> element
+    const img = document.getElementById('myimg');
+    img.setAttribute('src', url);
+  })
+  .catch((error) => {
+    // Handle any errors
+  });
+
 
 // Authentication
 const auth = getAuth();
@@ -82,16 +88,16 @@ setup() {
   const fileInput = ref(null);
 
   const uploadFile = async () => {
-      if (fileInput.value) {
-        const file = fileInput.value.files[0];
-        const storage = getStorage();
-        const storageRef = firebaseRef(storage, file.name);
+    if (fileInput.value) {
+      const file = fileInput.value.files[0];
+      const storage = getStorage();
+      const storageRef = firebaseRef(storage, file.name);
 
-        uploadBytes(storageRef, file).then((snapshot) => {
-          console.log('Uploaded a file!');
-        });
-      }
-    };
+      uploadBytes(storageRef, file).then((snapshot) => {
+        console.log('Uploaded a file!');
+      });
+    }
+  };
 
   const bookRepoList = ref([])
   onAuthStateChanged(auth, (user) => {
@@ -116,18 +122,19 @@ setup() {
 },
 
   methods: {
-   addItem() {
-    // Add the book data to Firestore
-    addDoc(bookRepo.value, { name: this.booksToRead, author: this.author, description: this.description }).then(() => {
-      this.booksToRead = ''
-      this.author = ''
-      this.description = ''
-    })
-  },
+
+    addItem() {
+      addDoc(bookRepo.value, { name: this.booksToRead, author: this.author, description: this.description }).then((docRef) => {
+        this.booksToRead = ''
+        this.author = ''
+        this.description = ''
+        bookID = docRef.id;
+        console.log("book id is: " + bookID)
+      })
+},
     async removeBookRepo(id) {
       if(id) {
         await deleteDoc(doc(db,'users', uid, 'bookRepo', `${id}`));
-
       }
     }
   }
