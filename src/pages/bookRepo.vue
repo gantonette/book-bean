@@ -17,12 +17,10 @@
       </div>
     </q-card>
 
-
-
-
     <div class="bookRepo-cards center" v-for="book in bookRepoList" :key="book.id">
       <q-card class="my-card">
-        <q-img src='../assets/images/bookcover.png'>
+        <q-img :src='book.imgURL'>
+
           <div class="absolute-bottom">
             <div class="text-h6"><p>{{ book.name }}</p></div>
             <div class="text-overline"><p>{{ book.author }}</p></div>
