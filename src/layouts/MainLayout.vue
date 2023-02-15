@@ -7,26 +7,25 @@
         </q-toolbar-title>
       </q-toolbar>
 
-    <div class="q-horizontal-nav" id="vertical-nav">
-      <q-btn to="/#" v-if="isLoggedIn">Home</q-btn>
-      <q-btn to="/bookRepo" v-if="isLoggedIn">Book Repo</q-btn>
-      <q-btn to="/TimelinePage" v-if="isLoggedIn">Timeline</q-btn>
-      <q-btn to="/register" v-if="!isLoggedIn">Register</q-btn>
-      <q-btn to="/signIn" v-if="!isLoggedIn">Sign In</q-btn>
-      <button @click="handleSignOut" v-if="isLoggedIn">Sign Out</button>
-     </div>
-</q-header>
+      <div class="q-horizontal-nav q-gutter-sm text-center" id="vertical-nav" style="border: none;">
+        <q-btn to="/#" v-if="isLoggedIn" class="text-green-8">Home</q-btn>
+        <q-btn to="/bookRepo" v-if="isLoggedIn" class="text-green-8">Book Repo</q-btn>
+        <q-btn to="/TimelinePage" v-if="isLoggedIn" class="text-green-8">Timeline</q-btn>
+        <q-btn to="/register" v-if="!isLoggedIn" class="text-green-8">Register</q-btn>
+        <q-btn to="/signIn" v-if="!isLoggedIn" class="text-green-8">Sign In</q-btn>
+        <button @click="handleSignOut" v-if="isLoggedIn" class="text-red-8" style="float:right;">Sign Out</button>
+      </div>
+    </q-header>
 
-<!-- dont delete very important -->
-<q-page-container>
-  <router-view />
-</q-page-container>
- <!-- dont delete very important -->
-
-</q-layout>
+    <!-- dont delete very important -->
+    <q-page-container>
+      <router-view />
+    </q-page-container>
+    <!-- dont delete very important -->
+  </q-layout>
 </template>
-<script setup>
 
+<script setup>
 import { defineComponent, ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 import { onMounted } from "vue";

@@ -1,24 +1,33 @@
 <template>
-  <div class="q-pa-lg">
+  <div class="q-pa-lg flex flex-center bg-green-1">
     <q-timeline :layout="layout" :side="side" color="secondary">
-      <q-timeline-entry heading>Book Bean</q-timeline-entry>
+      <h1 class="text-center text-green-9">book bean</h1>
+      <img src="../assets/images/timeline-cover.png" alt="Book Bean Logo" class="book-bean-logo"/>
+      <h6 class="text-overline text-center text-green-8 bg-green-1">snap a photo & grow ur library</h6>
+      <q-btn class="text-overline text-center text-green-8 bg-green-1" label="Add Book" color="primary" @click="showDialog = true" />
+
+
       <template v-for="book in bookRepoList" :key="book.id">
-        <q-timeline-entry class="timeline-entry"
+        <q-timeline-entry
+          class="custom-timeline-entry"
           :title="book.name"
-          :subtitle="book.author"
+          :subtitle="new Date(book.timestamp).toLocaleString('en-us', {day: 'numeric', month: 'short', hour: 'numeric', minute: 'numeric', second: 'numeric'})"
           side="right"
           size="large"
         >
-        <div class="q-pt-lg timeline-entry-content">
-          <img class="timeline-img" :src="book.imgURL" />
-          <div class="q-mt-sm">Author: {{book.author}}</div>
-          {{book.description}}
-        </div>
-      </q-timeline-entry>
-    </template>
+          <div class="timeline-content">
+            <h6 class="text-overline text-center text-green-8 bg-green-1">{{ book.author }}</h6>
+              <img class="timeline-img" :src="book.imgURL" alt="Book cover"/>
+            <div class="timeline-description">
+              {{ book.description }}
+            </div>
+          </div>
+        </q-timeline-entry>
+      </template>
 
-    </q-timeline>
+  </q-timeline>
 
+    <q-dialog v-model="showDialog">
     <q-card id="q-card-input" class="relative-position q-pa-lg flex flex-center bg-light-green-3" style="width: 50%">
       <div class="col-12">
         <q-input color="green-8" v-model="booksToRead" label="book" />
@@ -31,6 +40,7 @@
         </q-input>
       </div>
     </q-card>
+  </q-dialog>
   </div>
 </template>
 
@@ -60,15 +70,19 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// Storage
 const bookRepo = ref();
 
 export default defineComponent({
 name: "TimelinePage",
 
+// ********** DATA **********
 setup() {
+  // For the popup dialog
+  const showDialog = ref(false);
+
   // Storage
   const fileInput = ref(null);
-
     const uploadFile = async () => {
       const file = fileInput.value.files[0];
 
@@ -96,17 +110,21 @@ setup() {
 
 
 // BookRepo
-  const bookRepoList = ref([])
+const bookRepoList = ref([]);
   onAuthStateChanged(auth, (user) => {
     if (user) {
       const uid = user.uid;
       bookRepo.value = collection(db, 'users', uid, 'bookRepo');
       onSnapshot(bookRepo.value, (snapshot) => {
-        bookRepoList.value = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }))
-        console.log(bookRepoList.value)
+        bookRepoList.value = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        bookRepoList.value.sort((a, b) => b.timestamp - a.timestamp); // Sort by descending timestamp
       });
     }
   });
+
+  const booksToRead = ref('');
+  const author = ref('');
+  const description = ref('');
 
   return {
     bookRepoList,
@@ -114,11 +132,18 @@ setup() {
     side: ref('left'),
 
     fileInput,
-    uploadFile
+    uploadFile,
 
-  }
+    // New book properties
+    booksToRead,
+    author,
+    description,
+
+    showDialog,
+  };
 },
 
+// ********** METHODS **********
   methods: {
 
     addItem() {
@@ -126,7 +151,8 @@ setup() {
         name: this.booksToRead,
         author: this.author,
         description: this.description,
-        imgURL: null
+        imgURL: null,
+        timestamp: Date.now(), // Add timestamp
       };
 
       // Add the book to Firestore

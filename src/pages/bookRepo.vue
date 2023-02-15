@@ -6,21 +6,11 @@
     <h1 class="text-center text-green-9">book repository</h1>
     <h6 class="text-overline text-center text-green-8 bg-green-1">books that have been read are stored here!</h6>
 
-    <q-card class="flex flex-center bg-light-green-3" style="width: 50%">
-      <div class="col-12">
-        <q-input color="green-8" v-model="booksToRead" label="book" >
-        <q-input color="green-8" v-model="author" label="author"/>
-          <template v-slot:append>
-            <q-btn round color="green-3" icon="local_florist" :ripple="{ center: true }" @click="addItem"/>
-          </template>
-        </q-input>
-      </div>
-    </q-card>
+
 
     <div class="bookRepo-cards center" v-for="book in bookRepoList" :key="book.id">
       <q-card class="my-card">
-        <q-img :src='book.imgURL'>
-
+        <q-img class="repo-img" :src='book.imgURL'>
           <div class="absolute-bottom">
             <div class="text-h6"><p>{{ book.name }}</p></div>
             <div class="text-overline"><p>{{ book.author }}</p></div>
