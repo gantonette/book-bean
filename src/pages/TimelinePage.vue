@@ -36,11 +36,29 @@
           <input type="file" ref="fileInput"/>
           <template v-slot:append>
             <q-btn round color="green-3" icon="local_florist" :ripple="{ center: true }" @click="addItem() + uploadFile()"/>
+            <q-btn label="Add Existing Book" color="primary" @click="showBookRepoDialog = true" />
+
           </template>
         </q-input>
       </div>
     </q-card>
   </q-dialog>
+
+  <!-- opens users book repository to select existing book -->
+  <q-dialog v-model="showBookRepoDialog">
+  <q-card>
+    <q-list dense>
+      <q-item v-for="book in bookRepoList" :key="book.id" clickable @click="selectedBook = book">
+        <q-item-section>{{ book.name }}</q-item-section>
+        <q-item-section side>
+          <q-btn icon="add" color="primary" @click="addExistingBook(book.id)" />
+        </q-item-section>
+      </q-item>
+    </q-list>
+  </q-card>
+</q-dialog>
+
+
   </div>
 </template>
 
@@ -80,6 +98,9 @@ name: "TimelinePage",
 setup() {
   // For the popup dialog
   const showDialog = ref(false);
+  const showBookRepoDialog = ref(false);
+  const selectedBook = ref(null);
+
 
   // Storage
   const fileInput = ref(null);
@@ -140,13 +161,14 @@ const bookRepoList = ref([]);
     description,
 
     showDialog,
+    showBookRepoDialog,
   };
 },
 
 // ********** METHODS **********
   methods: {
 
-    addItem() {
+    async addItem() {
       const book = {
         name: this.booksToRead,
         author: this.author,
@@ -165,11 +187,32 @@ const bookRepoList = ref([]);
       });
     },
 
-    async removeBookRepo(id) {
-      if(id) {
-        await deleteDoc(doc(db,'users', uid, 'bookRepo', `${id}`));
+
+    async addExistingBook(id) {
+      console.log("this is the book: " + id);
+
+      const book = {
+        name: this.booksToRead,
+        author: this.author,
+        description: this.description,
+        imgURL: null,
+        timestamp: Date.now(), // Add timestamp
+      };
+
+      // Add the book to Firestore
+      if (id) {
+        const docRef = await addDoc(collection(bookRepo.value, id, "timelineEntries"), book);
+        console.log('Document written with ID: ' + docRef.id);
+
+        // Update the imgURL field with the URL returned by uploadFile()
+        const imgURL = await this.uploadFile();
+        await updateDoc(doc(collection(bookRepo.value, id, "timelineEntries"), docRef.id), { imgURL });
+      } else {
+        console.error("id value is empty");
       }
     },
+
+
 
   }
 })

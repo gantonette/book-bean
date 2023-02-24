@@ -26,20 +26,6 @@ const analytics = getAnalytics(app);
 
 
 const storage = getStorage();
-// const storageRef = ref(storage, 'some-child-file');
-
-// const file = new File(['hello'], 'hello.txt')
-
-// // 'file' comes from the Blob or File API
-// uploadBytes(storageRef, file).then((snapshot) => {
-//   console.log('Uploaded a blob or file!');
-// });
-
-// Raw string is the default if no format is provided
-// const message = 'This is my message.';
-// uploadString(storageRef, message).then((snapshot) => {
-//   console.log('Uploaded a raw string!');
-// });
 
 const auth = getAuth(app);
 

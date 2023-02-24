@@ -81,6 +81,7 @@ setup() {
     },
     async removeBookRepo(id) {
       if(id) {
+        console.log('removing book: ' + id)
         await deleteDoc(doc(db,'users', uid, 'bookRepo', `${id}`));
 
       }
