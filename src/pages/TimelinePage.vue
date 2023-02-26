@@ -7,7 +7,7 @@
       <q-btn class="text-overline text-center text-green-8 bg-green-1" label="Add Book" color="primary" @click="showDialog = true" />
 
 
-      <template v-for="book in bookRepoList" :key="book.id">
+      <template v-for="book in timelineRepoList" :key="book.id">
         <q-timeline-entry
           class="custom-timeline-entry"
           :title="book.name"
@@ -66,14 +66,14 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { db } from './firebase';
-import { getFirestore, collection, onSnapshot, doc, deleteDoc, addDoc, updateDoc} from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, doc, deleteDoc, addDoc, updateDoc, setDoc} from "firebase/firestore";
 import { getAuth, getIdTokenResult, onAuthStateChanged } from "firebase/auth";
 import 'firebase/storage';
 import { getStorage, uploadBytes, ref as firebaseRef, getDownloadURL, getMetadata, updateMetadata } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
 
 
-// Authentication
+// ********* Authentication **********
 const auth = getAuth();
 const user = ref(auth.currentUser);
 let uid;
@@ -90,6 +90,7 @@ onAuthStateChanged(auth, (user) => {
 
 // Storage
 const bookRepo = ref();
+const timelineRepo = ref();
 
 export default defineComponent({
 name: "TimelinePage",
@@ -102,7 +103,7 @@ setup() {
   const selectedBook = ref(null);
 
 
-  // Storage
+  // ************ For the image upload ****************
   const fileInput = ref(null);
     const uploadFile = async () => {
       const file = fileInput.value.files[0];
@@ -130,25 +131,40 @@ setup() {
   };
 
 
-// BookRepo
+// ********* BookRepo **********
 const bookRepoList = ref([]);
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      const uid = user.uid;
-      bookRepo.value = collection(db, 'users', uid, 'bookRepo');
-      onSnapshot(bookRepo.value, (snapshot) => {
-        bookRepoList.value = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        bookRepoList.value.sort((a, b) => b.timestamp - a.timestamp); // Sort by descending timestamp
-      });
-    }
-  });
+const timelineRepoList = ref([]);
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const uid = user.uid;
+    bookRepo.value = collection(db, 'users', uid, 'bookRepo');
+
+    onSnapshot(bookRepo.value, (snapshot) => {
+      bookRepoList.value = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      bookRepoList.value.sort((a, b) => b.timestamp - a.timestamp); // Sort by descending timestamp
+    });
+
+     // timeline Repo all books
+    timelineRepo.value = collection(db, 'users', uid, 'timelineRepo');
+    onSnapshot(timelineRepo.value, (snapshot) => {
+      timelineRepoList.value = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      timelineRepoList.value.sort((a, b) => b.timestamp - a.timestamp); // Sort by descending timestamp
+    })
+  }
+});
+
+
 
   const booksToRead = ref('');
   const author = ref('');
   const description = ref('');
 
+
+
   return {
     bookRepoList,
+    timelineRepoList,
     layout: ref('loose'),
     side: ref('left'),
 
@@ -174,7 +190,7 @@ const bookRepoList = ref([]);
         author: this.author,
         description: this.description,
         imgURL: null,
-        timestamp: Date.now(), // Add timestamp
+        timestamp: Date.now(),
       };
 
       // Add the book to Firestore
@@ -184,6 +200,20 @@ const bookRepoList = ref([]);
         // Update the imgURL field with the URL returned by uploadFile()
         const imgURL = await this.uploadFile();
         await updateDoc(doc(bookRepo.value, docRef.id), { imgURL });
+
+        // Set the book in timelineRepo with the imgUrl field
+        const bookWithImgUrl = {
+          ...book,
+          imgURL: imgURL
+        };
+
+        setDoc(doc(timelineRepo.value, docRef.id), bookWithImgUrl).then(() => {
+          console.log('Added to timelineRepo successfully');
+        }).catch((error) => {
+          console.error('Error adding to timelineRepo: ', error);
+        });
+      }).catch((error) => {
+        console.error('Error adding to bookRepo: ', error);
       });
     },
 
@@ -196,7 +226,7 @@ const bookRepoList = ref([]);
         author: this.author,
         description: this.description,
         imgURL: null,
-        timestamp: Date.now(), // Add timestamp
+        timestamp: Date.now(),
       };
 
       // Add the book to Firestore
@@ -207,8 +237,17 @@ const bookRepoList = ref([]);
         // Update the imgURL field with the URL returned by uploadFile()
         const imgURL = await this.uploadFile();
         await updateDoc(doc(collection(bookRepo.value, id, "timelineEntries"), docRef.id), { imgURL });
-      } else {
-        console.error("id value is empty");
+
+        // Set the book in timelineRepo with the imgUrl field
+        const bookWithImgUrl = {
+          ...book,
+          imgURL: imgURL
+        };
+
+        // Add the same book to the timelineRepo collection
+        setDoc(doc(timelineRepo.value, docRef.id), bookWithImgUrl).then(() => {
+          console.log('Added to timelineRepo successfully');
+        })
       }
     },
 

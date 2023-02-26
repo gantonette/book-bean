@@ -2,14 +2,11 @@
 <template>
 <q-page class="flex flex-center bg-green-1">
   <div>
-
     <h1 class="text-center text-green-9">book repository</h1>
     <h6 class="text-overline text-center text-green-8 bg-green-1">books that have been read are stored here!</h6>
 
-
-
     <div class="bookRepo-cards center" v-for="book in bookRepoList" :key="book.id">
-      <q-card class="my-card">
+      <q-card class="my-card" @click="showBookTimeline = true">
         <q-img class="repo-img" :src='book.imgURL'>
           <div class="absolute-bottom">
             <div class="text-h6"><p>{{ book.name }}</p></div>
@@ -21,7 +18,16 @@
           <q-btn flat round color="green-9" icon="favorite" />
         </q-card-actions>
       </q-card>
+
+      <q-dialog v-model="showBookTimeline">
+        <q-card>
+          hi!
+        </q-card>
+      </q-dialog>
+
     </div>
+
+
 
   </div>
 </q-page>
@@ -56,6 +62,8 @@ name: "bookRepo",
 
 setup() {
 
+  const showBookTimeline = ref(false);
+
   const bookRepoList = ref([])
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -68,24 +76,25 @@ setup() {
   });
 
   return {
-    bookRepoList
+    bookRepoList,
+    showBookTimeline
+
   }
 },
 
   methods: {
-    addItem() {
-      addDoc(bookRepo.value, { name: this.booksToRead, author: this.author }).then(() => {
-        this.booksToRead = ''
-        this.author = ''
-      })
-    },
+
     async removeBookRepo(id) {
       if(id) {
         console.log('removing book: ' + id)
         await deleteDoc(doc(db,'users', uid, 'bookRepo', `${id}`));
 
+        // ******* !!! TODO: remove book from timelineEntries AND timeline as well !!! *******
+
       }
-    }
+    },
+
+
   }
 })
 
