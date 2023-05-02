@@ -1,6 +1,8 @@
-# Quasar App (quasar-bookv1)
+Book Bean - Book Journaling & Tracker App (2022 - 2023) In Progress. 
 
-A Quasar Project
+Book Bean is a book journaling and tracking web application developed using VueJS, JavaScript, Firebase, and Quasar. 
+
+
 
 ## Install the dependencies
 ```bash
